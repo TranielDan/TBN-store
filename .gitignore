@@ -1,0 +1,16 @@
+.git
+*/.DS_Store
+*.secret
+data/*
+!data/src
+jsdoc/*
+jsdoc_old/*
+other/*
+jsdoc.js
+jsdoc.json
+loader.html
+index.html
+
+data/src/.DS_Store
+
+.DS_Store

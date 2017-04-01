@@ -1,0 +1,142 @@
+<head>
+</head>
+
+<body>
+	<script>
+		var map = [],
+			dims = {width:0,height:0},
+			nodes = [],
+			elevation = 255,
+			erosion = 0,
+			res = 0,
+			zWater=32,
+			zSnow = 100,
+			zMin = 50,
+			canvas = document.createElement("canvas"),
+			original = document.createElement("canvas"),
+			CTX = canvas.getContext("2d"),
+			render = true,
+			oCTX = original.getContext("2d"),
+			time = 0;
+
+			document.body.appendChild(original);
+			document.body.appendChild(canvas);
+			
+			canvas.imageSmoothingEnabled = false;
+			original.imageSmoothingEnabled = false;
+			
+		var createNoiseMap = (size,ren,r)=>{
+			render = ren;
+			res = r?r:Math.sqrt(size)*2;
+			var resolution = res;
+			var width = size;
+			var height = size;
+			for(var ry = 0; ry<resolution; ry++){
+				nodes.push([])
+				for(var rx = 0; rx<resolution; rx++){
+					if(rx>resolution-4||rx<4||ry>resolution-4||ry<4){
+						nodes[ry].push(zWater/4);
+					}else if(rx>resolution-6||ry>resolution-6||rx<6||ry<6){
+						nodes[ry].push(Math.floor(Math.random()*(zWater*.2)));
+					}
+					else if(rx>resolution-7||ry>resolution-7||rx<7||ry<7){
+						nodes[ry].push(Math.floor(Math.random()*(elevation-180)));
+					}else{
+						nodes[ry].push(Math.floor(Math.random()*(elevation-zWater)+zWater/1.5));
+					}
+
+					
+				}
+			}
+			dims = {width:width,height:height};
+			for(var x = 0; x<width; x++){
+				map.push([]);
+				for(var y = 0; y<height; y++){
+					var nodeIndex = getNodeIndex(x,y);
+					var node = nodes[nodeIndex[0]][nodeIndex[1]]
+					if(node > zWater && node<=zWater+20){node = 255}
+					map[x].push(node);
+				}
+			}
+			appendNew(oCTX, original);
+		}
+
+		var erode = (ittr,ctx, can)=>{
+			//var ctx = appendNew();
+			var start = new Date().getTime();
+			for(var x = 0; x<map.length; x++){
+				for(var y = 0; y<map.length; y++){
+					var average = getSurroundingsAverage(x,y,ittr<80?true:false);
+					map[x][y] = average;
+				}
+			}
+			time = new Date().getTime() - start;
+			if(render||ittr%8==0){appendNew(ctx?ctx:CTX, can?can:canvas)};
+			document.title = ittr+" Erosion cycles left, ETA: "+Math.floor(ittr*time/1000/60)+" Mins "+(Math.floor(ittr*time/1000)%60)+" Sec";
+			if(ittr==0){document.title = "DONE";appendNew(ctx?ctx:CTX, can?can:canvas);return;}
+			setTimeout(()=>{erode(ittr-1)},16);
+			
+		}
+
+		var appendNew = (ctx, can)=>{
+			erosion++;
+
+			can.id = "erosion_"+erosion;
+			//canvas.onclick = erode();
+			can.height = dims.height;
+			can.width = dims.width;
+
+			document.body.appendChild(canvas);
+
+			for(var x = 0; x<map.length; x++){
+				for(var y = 0; y<map[x].length; y++){
+					ctx.fillStyle = computeFillStyle(map[x][y]);
+					ctx.fillRect(x,y,1,1);
+				}
+			}
+
+			return ctx;
+		}
+
+		var computeFillStyle = (value)=>{
+			var calc = value<255?value%255:0
+			if(value<zWater){
+				return "rgb("+0+","+0+","+calc*8+50+")";
+			}else if(value>zSnow){
+				return "rgb("+(calc+50)+","+(calc+50)+","+(calc+50)+")";
+			}else if(value==zWater+1){
+				return "rgb("+200+","+200+","+50+")";
+			}
+			return "rgb("+Math.floor(calc/2)+","+(calc+50)+","+Math.floor(calc/2)+")";
+			
+		}
+
+		var getSurroundings = (px,py)=>{
+			return [ map[px-1]?map[px-1][py]:0,
+			map[px+1]?map[px+1][py]:0,
+			map[px][py-1]?map[px][py-1]:0,
+			map[px][py+1]?map[px][py+1]:0,
+			map[px][py] ].filter((a)=>{return !!a;})
+		}
+
+		var getSurroundingsAverage = (px,py,roots)=>{
+			var neigh = getSurroundings(px,py);
+			var sum = 0;
+			neigh.map((a)=>{sum+=a;});
+			var val = Math.floor(sum/neigh.length)
+			/*if(map[px][py]>=zSnow+zSnow/2&&roots){
+				val = Math.floor(((sum/neigh.length)+map[px][py])/4);
+			}*/
+			return !Number.isNaN(val)?val:0;
+		}
+
+		var getNodeIndex = (x,y)=>{
+			return [Math.floor(x/(dims.width/res)),Math.floor(y/(dims.height/res))];
+		}
+
+		document.body.onload = ()=>{
+			createNoiseMap(512,false);
+			erode(256/2+10);
+		}
+	</script>
+</body>

@@ -1,0 +1,115 @@
+<head>
+</head>
+
+<bodY>
+	<script>
+		dev = 4;
+		berp = (x0, x3, x, x1, x2) => {
+			var diff = Math.abs(x0 - x3),
+				deviation = diff / 8,
+				x1 = x1 ? x1 : x0 + deviation,
+				x2 = x2 ? x2 : x3 - deviation;
+			//!x ? x++ : null;
+			x /= 4;
+			x += 1;
+
+
+			return 0 +
+				x0 * ((x - 4) / (1 - 4)) * ((x - 2) / (1 - 2)) * ((x - 3) / (1 - 3)) +
+				x1 * ((x - 1) / (2 - 1)) * ((x - 4) / (2 - 4)) * ((x - 3) / (2 - 3)) +
+				x2 * ((x - 1) / (3 - 1)) * ((x - 2) / (3 - 2)) * ((x - 4) / (3 - 4)) +
+				x3 * ((x - 3) / (4 - 3)) * ((x - 1) / (4 - 1)) * ((x - 2) / (4 - 2));
+
+			// Input a number between 0 and 1, get back a number between max-min;
+		}
+
+		lip = (x0, x3, x, x1, x2) => {
+			// Input a number between 0 and 1, get back a number between max-min;
+			var diff = Math.abs(x0 - x3),
+				deviation = diff / 32,
+				x1 = x1 ? x1 : x0 + deviation,
+				x2 = x2 ? x2 : x3 - deviation;
+			x += 1;
+			x *= 4;
+
+
+			return 0 +
+				x0 * ((x - 4) / (1 - 4)) * ((x - 2) / (1 - 2)) * ((x - 3) / (1 - 3)) +
+				x1 * ((x - 1) / (2 - 1)) * ((x - 4) / (2 - 4)) * ((x - 3) / (2 - 3)) +
+				x2 * ((x - 1) / (3 - 1)) * ((x - 2) / (3 - 2)) * ((x - 4) / (3 - 4)) +
+				x3 * ((x - 3) / (4 - 3)) * ((x - 1) / (4 - 1)) * ((x - 2) / (4 - 2));
+		}
+
+		testGraph = () => {
+			canvas = document.getElementById("graph");
+			ctx = canvas.getContext("2d");
+			middle = 500;
+			scale = 20;
+			dim = 1000;
+
+			berpstart = 2;
+			berp2 = 50;
+			berp3 = 4;
+			berpend = 10;
+
+			resolution = 5;
+			ctx.font = '12px arial';
+			ctx.fillStyle = "blue";
+			ctx.beginPath();
+			ctx.strokeStyle = "black";
+			ctx.moveTo(0, middle);
+			ctx.lineTo(dim, middle);
+			ctx.stroke();
+
+
+			ctx.strokeStyle = "grey";
+
+			for (var i = 0; i < scale; i++) {
+				ctx.beginPath();
+				ctx.strokeStyle = "lightgrey";
+				if (i < 4 * (resolution - 2) + 1) {
+					ctx.strokeStyle = "black";
+
+				}
+
+
+				ctx.moveTo(dim / scale * i, 0);
+				ctx.lineTo(dim / scale * i, dim);
+
+				ctx.stroke();
+
+				ctx.beginPath();
+				ctx.strokeStyle = "grey";
+				ctx.moveTo(0, dim / scale * i);
+				ctx.lineTo(dim, dim / scale * i);
+
+
+
+				ctx.stroke();
+			}
+
+
+			ctx.beginPath();
+			ctx.strokeStyle = "red";
+			ctx.lineWidth = 4;
+			ctx.moveTo(0, middle);
+
+			for (var x = 0; x < scale * resolution; x++) {
+				ctx.lineTo(dim / scale * x, middle - berp(berpstart, berpend, x, berp2, berp3));
+
+				ctx.fillStyle = "blue";
+				ctx.fillText(parseInt(berp(berpstart, berpend, x, berp2, berp3)), dim / scale * x,
+					middle - berp(berpstart, berpend, x, berp2, berp3) - 20);
+
+				ctx.fillStyle = "grey";
+				ctx.fillText(x, dim / scale * x,
+					middle - berp(berpstart, berpend, x, berp2, berp3) - 40)
+			}
+			ctx.stroke();
+		}
+
+		document.body.onload = testGraph;
+	</script>
+	<canvas id="graph" height="1000" width="1000" style="background-color: white;">
+	</canvas>
+</body>
