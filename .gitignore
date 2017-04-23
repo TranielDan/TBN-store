@@ -10,6 +10,7 @@ jsdoc.js
 jsdoc.json
 loader.html
 index.html
+OLD_*/*
 
 data/src/.DS_Store
 
